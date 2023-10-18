@@ -3,11 +3,13 @@
 # import dracclient
 # from getpass import getpass
 import paramiko
-from paramiko import SSHClient, AutoAddPolicy
-from paramiko.transport import Transport
+# from paramiko import SSHClient, AutoAddPolicy
+# from paramiko.transport import Transport
 import getpass
 import pandas as pd
-import sys
+# import sys
+import pprint
+import json
 
 
 client = paramiko.SSHClient()
@@ -30,12 +32,11 @@ def sshConnection(host, port, username, password, rcmd):
     transport.auth_interactive_dumb(username, handler=None)
     channel = transport.open_session()
 
-    # print(channel.recv(1024).decode('utf-8'))
-
     try:
         # channel.exec_command("racadm getsvctag")
         channel.exec_command(str(rcmd))
-        return (channel.recv(1024).decode('utf-8'))
+        out = (channel.recv(1024).decode('utf-8'))
+        return (out)
         # print("Serial:")
         # print(channel.recv(1024).decode('utf-8'))
     except paramiko.AuthenticationException:
@@ -58,25 +59,33 @@ def loadIp(filePath):
         print(e)
     return IPs
 
-   
+
 def main():
 
-    # username = input("Please Enter iDrac Username: ")
-    # password = getpass.getpass(prompt="Please Enter iDrac Password: ")
-    username = "hadesfactor"
-    password = "showbiz666!"
-    rcmd = runCommand()
+    username = input("Please Enter iDrac Username: ")
+    password = getpass.getpass(prompt="Please Enter iDrac Password: ")
+    # username = "hadesfactor"
+    # password = "showbiz666!"
 
+    # # uncomment to run the same command across IP list
+    # rcmd = runCommand()
     port = 22
-
     IPs = loadIp(input("Enter File Location and Name of XLS containing list of hosts: "))
-    # print("Total Number of Hosts to Apply Command: {}".format(len(IPs)))
-
     # host = ("192.168.1.98")
+
     for host in IPs:
-        print(host)
-        out = sshConnection(host, port, username, password, rcmd)
+        rcmd = runCommand()
+        # print('Host: ', host, 'Command: ', rcmd)
+        output = (sshConnection(host, port, username, password, rcmd))
+        print(output)
+        # return (out)
+        # test_dict = json.loads(out)
+        # print(dict(test_dict))
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
